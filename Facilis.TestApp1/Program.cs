@@ -50,25 +50,57 @@ namespace Facilis.LineItems
         /// </summary>
         private static void PrintItems(IEnumerable<Item> items, string precedence = "-")
         {
-            items.CreateParentChildHierarchyList(1, 0, items.First(), null);
             items.CreateParentChildHierarchyList();
+            //items.CreateParentChildHierarchyList(0);
         }
     }
 
     internal static class ExtensionHierarchyList
     {
         public static void CreateParentChildHierarchyList<T>(
-            this IEnumerable<T> items, int itemId, int parentId, T parent, List<T> children)
+            this IEnumerable<T> items) where T : Item
         {
-            Type d1 = typeof(T);
-            var itemIdProperty = d1.GetProperty("Id").GetValue(parent);
-            //var test = itemIdProperty.GetValue(parent);
+            //Assumption: In the following example, the Root Item always has the ParentId set to 0.
+            items.Where(item => item.ParentId == 0)
+                    //I added the order by to make sure, atleast in the provided case, that we ordered by the first parent added to the list.
+                    .OrderBy(item => item.Id)
+                    .ToList()
+                    .ForEach(item => SetChildren(item.Id, item.ParentId, item, items.ToList()));
         }
 
-        #region Item object known
+        private static void SetChildren<T>(int itemId, int parentId, T parent, List<T> itemList, int precedenceCounter = 1) where T : Item
+        {
+            //Get all the children under the same ParentId
+            List<Item> children = itemList.Where(x => x.ParentId == itemId).ToList<Item>();
+
+            //Save the list of children to that parent
+            parent.Children = children;
+
+            //Write the line
+            Console.WriteLine($"{string.Join("", Enumerable.Repeat("-", precedenceCounter))} {parent.Name}");
+
+            //If any children then recurse through them and find if they have any children. 
+            //Also for any child, set their parent
+            if (children.Any())
+            {
+                precedenceCounter += 1;
+                children.ForEach(child =>
+                {
+                    SetChildren(child.Id, parentId, child, itemList.ToList<Item>(), precedenceCounter);
+                    SetParent(parent, child);
+                });
+            }
+        }
+
+        private static void SetParent(Item parent, Item child)
+        {
+            child.Parent = parent;
+        }
+
+        #region Other way of doing it
         //Assuming we know we are going to use the Item object.
         public static void CreateParentChildHierarchyList<T>(
-            this IEnumerable<T> items)
+            this IEnumerable<T> items, int otherExample)
         {
             if (items is IEnumerable<Item> && items.Any())
             {
@@ -104,11 +136,6 @@ namespace Facilis.LineItems
                     SetParent(parent, child);
                 });
             }
-        }
-
-        private static void SetParent(Item parent, Item child)
-        {
-            child.Parent = parent;
         }
         #endregion
     }
