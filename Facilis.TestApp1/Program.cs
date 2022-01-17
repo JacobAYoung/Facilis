@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Facilis.LineItems.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using Facilis.LineItems.Models;
 
 namespace Facilis.LineItems
 {
