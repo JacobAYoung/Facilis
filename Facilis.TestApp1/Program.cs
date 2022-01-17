@@ -82,16 +82,16 @@ namespace Facilis.LineItems
             }
         }
 
-        private static void SetChildren(Item item, IEnumerable<Item> itemList, int precedenceCounter = 1)
+        private static void SetChildren(Item parent, IEnumerable<Item> itemList, int precedenceCounter = 1)
         {
             //Get all the children under the same ParentId
-            List<Item> children = itemList.Where(x => x.ParentId == item.Id).ToList();
+            List<Item> children = itemList.Where(x => x.ParentId == parent.Id).ToList();
 
             //Save the list of children to that parent
-            item.Children = children;
+            parent.Children = children;
 
             //Write the line
-            Console.WriteLine($"{string.Join("", Enumerable.Repeat("-", precedenceCounter))} {item.Name}");
+            Console.WriteLine($"{string.Join("", Enumerable.Repeat("-", precedenceCounter))} {parent.Name}");
 
             //If any children then recurse through them and find if they have any children. 
             //Also for any child, set their parent
@@ -101,7 +101,7 @@ namespace Facilis.LineItems
                 children.ForEach(child =>
                 {
                     SetChildren(child, itemList, precedenceCounter);
-                    SetParent(item, child);
+                    SetParent(parent, child);
                 });
             }
         }
