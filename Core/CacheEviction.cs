@@ -27,7 +27,7 @@ namespace Core
             await Task.Delay(secondsTillHour * 60);
 
             //Start the timer to reset the cache every 15 minutes
-            Timer t = new Timer(ResetCacheOnTimer, null, 0, 150000);
+            Timer t = new Timer(ResetCacheOnTimer, null, 0, 900000);
         }
 
         private void ResetCacheOnTimer(Object o)
